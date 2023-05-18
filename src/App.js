@@ -6,6 +6,7 @@ import Footer from './components/Footer/Footer';
 import Login from './pages/Login/Login';
 import Register from './pages/Register/Register';
 import Navbar from './components/Navbar/Navbar';
+import './firebase/config';
 
 function App() {
   return (
