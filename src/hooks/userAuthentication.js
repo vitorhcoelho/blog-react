@@ -1,4 +1,4 @@
-import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { getAuth, createUserWithEmailAndPassword, updateProfile, signOut, signInWithEmailAndPassword } from 'firebase/auth';
 import { useState, useEffect } from 'react';
 
 export const useAuthentication = () => {
@@ -20,8 +20,8 @@ export const useAuthentication = () => {
     setLoading(true);
 
     try {
-      const { user } = createUserWithEmailAndPassword(auth, data.email, data.password);
-
+      const { user } = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      debugger
       await updateProfile(user, { displayName: data.displayName });
 
       return user;
@@ -31,18 +31,43 @@ export const useAuthentication = () => {
 
       let systemErrorMessage;
 
-      if (error.message.includes("Password")) {
-        systemErrorMessage = "Password needs minimum 6 characters";
-      } else if (error.message.includes("email-already")) {
-        systemErrorMessage = "E-mail already in used";
-      } else {
-        systemErrorMessage = "An error has occurred, please try again";
-      }
+      if (error.message.includes("Password")) systemErrorMessage = "Password needs minimum 6 characters";
+      else if (error.message.includes("email-already")) systemErrorMessage = "E-mail already in used";
+      else systemErrorMessage = "An error has occurred, please try again";
 
       setError(systemErrorMessage);
     }
 
     setLoading(false);
+  }
+
+  const logout = () => {
+    checkIfIsCancelled()
+
+    signOut(auth)
+  }
+
+  const login = async (data) => {
+    checkIfIsCancelled()
+
+    setLoading(true)
+    setError(false)
+
+    try {
+      await signInWithEmailAndPassword(auth, data.email, data.password)
+    } catch (error) {
+
+      let systemErrorMessage;
+
+      if (error.message.includes("user-not-found")) {
+        systemErrorMessage = "User not found"
+      } else if (error.message.includes("wrong-password")) {
+        systemErrorMessage = "Wrong password"
+      }
+
+      setError(systemErrorMessage)
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -53,7 +78,9 @@ export const useAuthentication = () => {
     auth,
     createUser,
     error,
-    loading
+    loading,
+    logout,
+    login
   };
 
 };  
