@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 
 import styles from './CreatePost.module.css'
 import { useInsertDocument } from '../../hooks/useInsertDocument'
@@ -59,11 +59,6 @@ const CreatePost = () => {
 
     if (!formError) return navigate("/")
   }
-
-  useEffect(() => {
-    console.log("dedé")
-  }, [tags])
-
 
   return (
     <div className={styles.create_post}>

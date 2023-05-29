@@ -1,14 +1,14 @@
 import { db } from '../firebase/config'
-import { collection, query, orderBy, onSnapshot, where, doc } from "firebase/firestore";
+import { collection, query, orderBy, onSnapshot, where } from "firebase/firestore";
 
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export const useFetchDocuments = (docCollection, search = null, uid = null) => {
-  const [documents, setDocuments] = useState()
-  const [error, setError] = useState()
-  const [loading, setLoading] = useState()
+  const [documents, setDocuments] = useState(null)
+  const [error, setError] = useState(null)
+  const [loading, setLoading] = useState(null)
 
-  const [cancelled, setCancelled] = useState()
+  const [cancelled, setCancelled] = useState(false)
 
   useEffect(() => {
     async function loadData() {
@@ -19,10 +19,18 @@ export const useFetchDocuments = (docCollection, search = null, uid = null) => {
       const collectionRef = await collection(db, docCollection)
 
       try {
-        let q
+        let q;
 
-        q = await query(collectionRef, orderBy("createdAt", "desc"))
+        if (search) {
+          q = await query(
+            collectionRef,
+            where("tagsArray", "array-contains", search),
+            orderBy("createdAt", "desc")
+          )
 
+        } else {
+          q = await query(collectionRef, orderBy("createdAt", "desc"))
+        }
         await onSnapshot(q, (querySnapshot) => {
           setDocuments(
             querySnapshot.docs.map((doc) => ({
@@ -31,25 +39,18 @@ export const useFetchDocuments = (docCollection, search = null, uid = null) => {
             }))
           );
         });
-
-        setLoading(false)
-
-
       } catch (error) {
-        console.log(error)
+        console.log('error', error)
         setError(error.message)
-        setLoading(false)
       }
+      setLoading(false)
     }
-
     loadData()
   }, [docCollection, search, uid, cancelled])
-
 
   useEffect(() => {
     return () => { setCancelled(true) }
   }, [])
-
 
   return { documents, loading, error }
 }
