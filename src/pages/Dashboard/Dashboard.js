@@ -5,6 +5,7 @@ import styles from './Dashboard.module.css'
 import { useAuthValue } from "../../context/AuthContext";
 import { useFetchDocuments } from "../../hooks/useFetchDocuments";
 import { Link } from 'react-router-dom';
+import { useDeleteDocument } from '../../hooks/useDeleteDocument';
 
 const Dashboard = () => {
   const { user } = useAuthValue()
@@ -12,7 +13,7 @@ const Dashboard = () => {
 
   const { documents: posts } = useFetchDocuments("posts", null, uid)
 
-  const deleteDocument = (id) => { }
+  const { deleteDocument } = useDeleteDocument("posts")
 
   return (
     <div className={styles.dashboard}>
